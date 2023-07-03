@@ -1,38 +1,31 @@
 ---
-title: ASP.NET Core Blazor advanced scenarios
+title: ASP.NET Core Blazor advanced scenarios (render tree construction)
 author: guardrex
-description: Learn about advanced scenarios in Blazor, including how to incorporate manual RenderTreeBuilder logic into an app.
+description: Learn how to incorporate manual logic for building Blazor render trees (RenderTreeBuilder).
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 03/16/2021
-no-loc: [Home, Privacy, Kestrel, appsettings.json, "ASP.NET Core Identity", cookie, Cookie, Blazor, "Blazor Server", "Blazor WebAssembly", "Identity", "Let's Encrypt", Razor, SignalR]
+ms.date: 11/08/2022
 uid: blazor/advanced-scenarios
 ---
-# ASP.NET Core Blazor advanced scenarios
+# ASP.NET Core Blazor advanced scenarios (render tree construction)
 
-## Manual RenderTreeBuilder logic
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
-<xref:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder> provides methods for manipulating components and elements, including building components manually in C# code.
+This article describes the advanced scenario for building Blazor render trees manually with <xref:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder>.
 
 > [!WARNING]
-> Use of <xref:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder> to create components is an *advanced scenario*. A malformed component (for example, an unclosed markup tag) can result in undefined behavior. Undefined behavior includes broken content rendering, loss of app features, and **_compromised security_**.
+> Use of <xref:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder> to create components is an *advanced scenario*. A malformed component (for example, an unclosed markup tag) can result in undefined behavior. Undefined behavior includes broken content rendering, loss of app features, and ***compromised security***.
+
+## Manually build a render tree (`RenderTreeBuilder`)
+
+<xref:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder> provides methods for manipulating components and elements, including building components manually in C# code.
 
 Consider the following `PetDetails` component, which can be manually rendered in another component.
 
 `Shared/PetDetails.razor`:
 
-::: moniker range=">= aspnetcore-5.0"
-
-[!code-razor[](~/blazor/common/samples/5.x/BlazorSample_WebAssembly/Shared/advanced-scenarios/PetDetails.razor)]
-
-::: moniker-end
-
-::: moniker range="< aspnetcore-5.0"
-
-[!code-razor[](~/blazor/common/samples/3.x/BlazorSample_WebAssembly/Shared/advanced-scenarios/PetDetails.razor)]
-
-::: moniker-end
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Shared/advanced-scenarios/PetDetails.razor":::
 
 In the following `BuiltContent` component, the loop in the `CreateComponent` method generates three `PetDetails` components.
 
@@ -40,17 +33,7 @@ In <xref:Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder> methods wi
 
 `Pages/BuiltContent.razor`:
 
-::: moniker range=">= aspnetcore-5.0"
-
-[!code-razor[](~/blazor/common/samples/5.x/BlazorSample_WebAssembly/Pages/advanced-scenarios/BuiltContent.razor?highlight=6,16-24,28)]
-
-::: moniker-end
-
-::: moniker range="< aspnetcore-5.0"
-
-[!code-razor[](~/blazor/common/samples/3.x/BlazorSample_WebAssembly/Pages/advanced-scenarios/BuiltContent.razor?highlight=6,16-24,28)]
-
-::: moniker-end
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/advanced-scenarios/BuiltContent.razor" highlight="6,16-24,28":::
 
 > [!WARNING]
 > The types in <xref:Microsoft.AspNetCore.Components.RenderTree> allow processing of the *results* of rendering operations. These are internal details of the Blazor framework implementation. These types should be considered *unstable* and subject to change in future releases.
@@ -83,14 +66,14 @@ if (someFlag)
 builder.AddContent(1, "Second");
 ```
 
-When the code executes for the first time, if `someFlag` is `true`, the builder receives:
+When the code executes for the first time and `someFlag` is `true`, the builder receives the sequence in the following table.
 
 | Sequence | Type      | Data   |
 | :------: | --------- | :----: |
 | 0        | Text node | First  |
 | 1        | Text node | Second |
 
-Imagine that `someFlag` becomes `false` and the markup is rendered again. This time, the builder receives:
+Imagine that `someFlag` becomes `false` and the markup is rendered again. This time, the builder receives the sequence in the following table.
 
 | Sequence | Type       | Data   |
 | :------: | ---------- | :----: |
@@ -115,14 +98,14 @@ if (someFlag)
 builder.AddContent(seq++, "Second");
 ```
 
-Now, the first output is:
+The first output is reflected in the following table.
 
 | Sequence | Type      | Data   |
 | :------: | --------- | :----: |
 | 0        | Text node | First  |
 | 1        | Text node | Second |
 
-This outcome is identical to the prior case, so no negative issues exist. `someFlag` is `false` on the second rendering, and the output is:
+This outcome is identical to the prior case, so no negative issues exist. `someFlag` is `false` on the second rendering, and the output is seen in the following table.
 
 | Sequence | Type      | Data   |
 | :------: | --------- | ------ |
